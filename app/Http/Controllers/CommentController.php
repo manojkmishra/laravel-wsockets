@@ -6,15 +6,13 @@ use Illuminate\Http\Request;
 use App\Post;
 use App\Comment;
 use Auth;
+use App\Events\NewComment;
 
 class CommentController extends Controller
 {
   public function index(Post $post)
   {
-      //return "aaa";
     return response()->json($post->comments()->with('user')->latest()->get());
-    //return $post->comments()->get();
-   // return $post;
   }
 
   public function store(Request $request, Post $post)
@@ -25,7 +23,7 @@ class CommentController extends Controller
     ]);
 
     $comment = Comment::where('id', $comment->id)->with('user')->first();
-
+    broadcast(new NewComment($comment))->toOthers();
     return $comment->toJson();
   }
 }
